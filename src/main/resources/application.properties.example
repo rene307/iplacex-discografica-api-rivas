@@ -1,0 +1,4 @@
+spring.application.name=discografia
+spring.data.mongodb.uri=REEMPLAZA-CON-TU-URI
+spring.data.mongodb.database=discografica-db
+server.port=8080
