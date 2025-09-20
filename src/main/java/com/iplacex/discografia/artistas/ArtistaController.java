@@ -1,15 +1,13 @@
 package com.iplacex.discografia.artistas;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@CrossOrigin
-@RequestMapping("/api")
+@RequestMapping("/api/artistas")           // siempre plural en la ruta
+@CrossOrigin(origins = "*")
 public class ArtistaController {
 
     private final IArtistaRepository repo;
@@ -18,19 +16,41 @@ public class ArtistaController {
         this.repo = repo;
     }
 
-    @GetMapping(value = "/artistas", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Artista> getAll() {
-        return repo.findAll();            // GET http://localhost:8080/api/artistas
+    // Ping para comprobar mapeo
+    @GetMapping("/ping")
+    public Map<String,String> ping() {
+        return Map.of("ok", "artistas");
     }
 
-    @PostMapping(
-        value = "/artista",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Artista> create(@RequestBody Artista body) {
-        Artista saved = repo.save(body);  // POST http://localhost:8080/api/artista  { "nombre": "Soda Stereo" }
-        return ResponseEntity.created(URI.create("/api/artista/" + saved.getId()))
-                             .body(saved);
+    @GetMapping
+    public List<Artista> all() {
+        return repo.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Artista byId(@PathVariable String id) {
+        return repo.findById(id)
+                   .orElseThrow(() -> new IllegalArgumentException("id no encontrado"));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Artista create(@RequestBody Artista a) {
+        if (a.getNombre() == null || a.getNombre().isBlank()) {
+            throw new IllegalArgumentException("nombre es requerido");
+        }
+        return repo.save(a);
+    }
+
+    @PutMapping("/{id}")
+    public Artista update(@PathVariable String id, @RequestBody Artista a) {
+        a.setId(id);
+        return repo.save(a);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String id) {
+        repo.deleteById(id);
     }
 }

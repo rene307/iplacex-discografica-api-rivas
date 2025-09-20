@@ -1,0 +1,22 @@
+# Crea 10 bandas
+$uri = 'http://localhost:8080/api/artista'
+$bandas = @(
+  'Soda Stereo',
+  'Los Fabulosos Cadillacs',
+  'Patricio Rey y sus Redonditos de Ricota',
+  'Divididos',
+  'Babasónicos',
+  'Los Piojos',
+  'La Renga',
+  'Enanitos Verdes',
+  'Virus',
+  'Los Auténticos Decadentes'
+)
+
+foreach ($b in $bandas) {
+  $body = @{ nombre = $b } | ConvertTo-Json
+  Invoke-RestMethod -Method POST -Uri $uri -ContentType 'application/json' -Body $body | Out-Null
+}
+
+# Lista todo para comprobar
+Invoke-RestMethod -Method GET -Uri 'http://localhost:8080/api/artistas'
