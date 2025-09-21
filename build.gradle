@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.iplacex'
-version = '1'                               // <- requerido por la pauta
+version = '1'   // requerido por la pauta
 
 java {
     toolchain { languageVersion = JavaLanguageVersion.of(22) }
@@ -21,12 +21,19 @@ dependencies {
 
 tasks.named('test') { useJUnitPlatform() }
 
-// (opcional) por si dejaste carpetas deshabilitadas
-sourceSets {
-    main { java { exclude 'com/iplacex/discografia/discos_off/**' } }
-}
+// Evita generar el jar "plain"
+tasks.named('jar') { enabled = false }
 
-// Asegura nombre del jar = <project-name>-<version>.jar
+// Nombre del bootJar: <project-name>-<version>.jar
 tasks.named('bootJar') {
     archiveFileName = "${rootProject.name}-${version}.jar"
+}
+
+// (Opcional) si dejaste esa carpeta deshabilitada
+sourceSets {
+    main {
+        java {
+            exclude 'com/iplacex/discografia/discos_off/**'
+        }
+    }
 }
