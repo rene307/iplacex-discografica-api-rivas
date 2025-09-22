@@ -1,15 +1,16 @@
-# --- STAGE 1: build ---
+# ---- build ----
 FROM eclipse-temurin:22-jdk AS build
 WORKDIR /app
 COPY . .
-# genera el bootJar
-RUN ./gradlew --no-daemon clean bootJar -x test
+# Asegura permisos del wrapper y construye el JAR
+RUN chmod +x ./gradlew && ./gradlew clean bootJar --no-daemon
 
-# --- STAGE 2: runtime ---
+# ---- run ----
 FROM eclipse-temurin:22-jre
 WORKDIR /app
-# copia el jar generado (evita el -plain)
-COPY --from=build /app/build/libs/*-1.jar /app/app.jar
+ENV PORT=8080
+# La URI la toma del application.properties (env o fallback)
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-ENV JAVA_OPTS=""
-ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
+# Render inyecta $PORT; respetamos ese puerto
+CMD ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]
